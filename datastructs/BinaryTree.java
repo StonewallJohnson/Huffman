@@ -124,6 +124,39 @@ public class BinaryTree<E extends Comparable<E>>{
     }
 
     /**
+     * Puts a node into the tree
+     * @param node
+     */
+    public void add(Node<E> node){
+        if(node == null){
+            throw new IllegalArgumentException("Can't add a null node!");
+        }
+        root = insertNode(root, node);
+        size++;
+    }
+
+    private Node<E> insertNode(Node<E> current, Node<E> insert){
+        if(current == null){
+            //first node, or found place to add node
+            return insert;
+        }
+        else{
+            //recurse
+            int compare = insert.getValue().compareTo(current.getValue());
+            if(compare > 0){
+                //insert.val > current.val, go right
+                current.setRight(insertNode(current.getRight(), insert));
+            }
+            else if(compare < 0){
+                //insert.val < current.val, go left
+                current.setLeft(insertNode(current.getLeft(), insert));
+            }
+            //node already present
+            return current;
+        }
+    }
+
+    /**
      * A function which inserts the given value into the
      * tree
      * @param root begins as root of tree, becomes nodes along the path to val
