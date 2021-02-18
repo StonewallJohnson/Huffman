@@ -31,8 +31,7 @@ public class HuffmanCoder {
 
         @Override
         public int compareTo(HuffmanCoder.LetterData o) {
-            // TODO: Auto-generated method stub
-            return 0;
+            return this.frequency - o.frequency;
         }
     }
 
@@ -50,7 +49,7 @@ public class HuffmanCoder {
         
         try {
             FileInputStream reader = new FileInputStream(txt);
-            BufferedInputStream buffer = new BufferedInputStream(reader)
+            BufferedInputStream buffer = new BufferedInputStream(reader);
             mapFile(buffer);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -60,6 +59,10 @@ public class HuffmanCoder {
 
         populateQueue();
         createTree();
+
+        encodings = new HashMap<>();
+        Byte b = 0x0;
+        getEncodings(root, b);
         encode();
     }
 
@@ -114,6 +117,32 @@ public class HuffmanCoder {
         root = queue.pop();
     }
 
+    /**
+     * Recursively builds the byte encoding for letters and
+     * stores them in a hash map
+     * @param curr
+     * @param encoding
+     */
+    private void getEncodings(LetterData curr, Byte encoding){
+        if(curr.left == null && curr.right == null){
+            //base case: leaf node
+            encodings.put(curr.c.charAt(0), encoding);
+        }
+        else{
+            //recursive
+            //append 0 and go left
+            encoding =  (byte) (encoding << 1);
+            getEncodings(curr.left, encoding);
+            //append 1 and go right
+            encoding = (byte) ((encoding << 1) | (0x1));
+            getEncodings(curr.right, encoding);
+        }
+    }
+
+    /**
+     * Uses the tree to create a new file according to the
+     * huffman encoding
+     */
     private void encode() {
         try{
             FileOutputStream fos = new FileOutputStream(result);
@@ -153,7 +182,7 @@ public class HuffmanCoder {
         char letter;
         while((letter = (char) inputBuffer.read()) >= 0){
             //until end of file
-            outBuffer.write(encodings.get(letter));
+            outBuffer.write((byte) encodings.get(letter));
         }
         inputBuffer.close();
     }
