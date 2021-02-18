@@ -1,10 +1,5 @@
 import datastructs.PriorityQueue;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.CharBuffer;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -12,10 +7,9 @@ import java.util.Set;
 public class HuffmanCoder {
     private File txt;
     private File result;
-    private FileReader reader;
     private PriorityQueue<LetterData> queue;
     private LetterData root;
-    private Map<char, Integer> data;
+    private Map<Character, Integer> data;
 
     private class LetterData implements Comparable<LetterData> {
         private String c;
@@ -50,43 +44,61 @@ public class HuffmanCoder {
     public HuffmanCoder(File given, File to) {
         txt = given;
         result = to;
+        data = new HashMap<>();
+        queue = new PriorityQueue<>();
+        
         try {
-            reader = new FileReader(given);
+            FileInputStream reader = new FileInputStream(txt);
+            BufferedInputStream buffer = new BufferedInputStream(reader)
+            mapFile(buffer);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        data = new HashMap<>();
-        try {
-            mapFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        queue = new PriorityQueue<>();
+
         populateQueue();
         createTree();
         encode();
     }
 
-    private void mapFile() throws IOException {
-        int input = reader.read();
-        while(input > 0){
+    /**
+     * Reads the given file byte by byte and maps the frequency of
+     * occurance into a data map
+     * @throws IOException attempts to read the given file
+     */
+    private void mapFile(BufferedInputStream buffer) throws IOException {
+        char input = (char) buffer.read();
+        while(input >= 0){
             if(data.get(input) != null){
                 //already in map
                 data.replace(input, data.get(input) + 1);
             }
+            else{
+                //not in map
+                data.put(input, 1);
+            }
         }
-        
+        buffer.close();
     }
-
+    
+    /**
+     * Takes the values from the frequency map, makes nodes 
+     * of them and adds the nodes to a priority queue
+     */
     private void populateQueue() {
-        Set<Integer> keys = data.keySet();
-        for (Integer c : keys) {
+        Set<Character> keys = data.keySet();
+        for (Character c : keys) {
             // for every key, value pair
-            LetterData myLet = new LetterData(c., data.get(c));
+            LetterData myLet = new LetterData(c.toString(), data.get(c));
             queue.pushIn(myLet);
         }
     }
 
+    /**
+     * Uses the Huffman algorithm to create a huffman tree
+     * from the data
+     */
     private void createTree() {
         while (queue.size() >= 2) {
             // until one letter data left
@@ -101,22 +113,39 @@ public class HuffmanCoder {
     }
 
     private void encode() {
-        // write tree to front of file
         try{
-            
-        } 
-        catch (IOException e1) {
-            e1.printStackTrace();
+            FileOutputStream fos = new FileOutputStream(result);
+            BufferedOutputStream writeBuff = new BufferedOutputStream(fos);
+            writeTree(root, writeBuff);
+            writeGiven(root, writeBuff);
         }
-
-
-
-        try{
-            scan = new Scanner(txt);
+        catch(IOException ex){
+            ex.printStackTrace();
         }
-        catch(FileNotFoundException e){
-            e.printStackTrace();
-        }
+    }
 
+    private void writeTree(LetterData curr, BufferedOutputStream buffer) throws IOException {
+        if(curr == null){
+            //base case: don't write anything
+        }
+        else{
+            //recursive
+            if(curr.c.length() > 1){
+                //this is a parent node, write 0
+                buffer.write(0x0);
+            }
+            else{
+                //leaf node
+                buffer.write(0x1);
+                //write letter
+                buffer.write(curr.c.getBytes()[0]);
+            }
+            writeTree(curr.left, buffer);
+            writeTree(curr.right, buffer);
+        }
+    }
+
+    private void writeGiven(LetterData curr, BufferedOutputStream buffer) throws IOException{
+        
     }
 }
