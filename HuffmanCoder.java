@@ -152,6 +152,7 @@ public class HuffmanCoder {
             BufferedOutputStream writeBuff = new BufferedOutputStream(fos);
             writeTree(root, writeBuff);
             writeGiven(writeBuff);
+            writeBuff.close();
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -182,10 +183,13 @@ public class HuffmanCoder {
     private void writeGiven(BufferedOutputStream outBuffer) throws IOException{
         FileInputStream fis = new FileInputStream(txt);
         BufferedInputStream inputBuffer = new BufferedInputStream(fis);
-        char letter;
-        while((letter = (char) inputBuffer.read()) >= 0){
+        int output = inputBuffer.read();
+        char letter = (char) output;
+        while(output >= 0){
             //until end of file
             outBuffer.write((byte) encodings.get(letter));
+            output = inputBuffer.read();
+            letter = (char) output;
         }
         inputBuffer.close();
     }
