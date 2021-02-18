@@ -9,6 +9,7 @@ public class HuffmanCoder {
     private File result;
     private PriorityQueue<LetterData> queue;
     private LetterData root;
+    private HashMap<Character, Byte> encodings;
     private Map<Character, Integer> data;
 
     private class LetterData implements Comparable<LetterData> {
@@ -78,6 +79,7 @@ public class HuffmanCoder {
                 //not in map
                 data.put(input, 1);
             }
+            input = (char) buffer.read();
         }
         buffer.close();
     }
@@ -117,7 +119,7 @@ public class HuffmanCoder {
             FileOutputStream fos = new FileOutputStream(result);
             BufferedOutputStream writeBuff = new BufferedOutputStream(fos);
             writeTree(root, writeBuff);
-            writeGiven(root, writeBuff);
+            writeGiven(writeBuff);
         }
         catch(IOException ex){
             ex.printStackTrace();
@@ -145,7 +147,14 @@ public class HuffmanCoder {
         }
     }
 
-    private void writeGiven(LetterData curr, BufferedOutputStream buffer) throws IOException{
-        
+    private void writeGiven(BufferedOutputStream outBuffer) throws IOException{
+        FileInputStream fis = new FileInputStream(txt);
+        BufferedInputStream inputBuffer = new BufferedInputStream(fis);
+        char letter;
+        while((letter = (char) inputBuffer.read()) >= 0){
+            //until end of file
+            outBuffer.write(encodings.get(letter));
+        }
+        inputBuffer.close();
     }
 }
