@@ -134,10 +134,10 @@ public class HuffmanCoder {
         else{
             //recursive
             //append 0 and go left
-            encoding =  (byte) (encoding << 1);
+            encoding = (byte) (encoding << 1);
             getEncodings(curr.left, encoding);
             //append 1 and go right
-            encoding = (byte) ((encoding << 1) | (0x1));
+            encoding = (byte) (encoding | 0x1);
             getEncodings(curr.right, encoding);
         }
     }
