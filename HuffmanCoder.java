@@ -72,8 +72,10 @@ public class HuffmanCoder {
      * @throws IOException attempts to read the given file
      */
     private void mapFile(BufferedInputStream buffer) throws IOException {
-        char input = (char) buffer.read();
-        while(input >= 0){
+        int output = buffer.read();
+        char input = (char) output;
+        while(output != -1){
+            //until end of file
             if(data.get(input) != null){
                 //already in map
                 data.replace(input, data.get(input) + 1);
@@ -82,7 +84,8 @@ public class HuffmanCoder {
                 //not in map
                 data.put(input, 1);
             }
-            input = (char) buffer.read();
+            output = buffer.read();
+            input = (char) output;
         }
         buffer.close();
     }
