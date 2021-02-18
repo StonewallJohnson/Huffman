@@ -64,11 +64,11 @@ public class DoublyLinkedList<E extends Comparable<E>>{
             //first node
             addFirstNodeOfList(val);
         }
-        else if(val.compareTo(head.con) < 0){
+        else if(val.compareTo(head.con) <= 0){
             //val < smallest val, this node belongs at the front
             addFront(val);
         }
-        else if(val.compareTo(tail.con) > 0){
+        else if(val.compareTo(tail.con) >= 0){
             //val > largest val, this node belongs at end
             addBack(val);
         }
