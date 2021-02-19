@@ -18,6 +18,10 @@ public class HuffmanCoder {
         private LetterData left;
         private LetterData right;
 
+        public LetterData(){
+
+        }
+
         public LetterData(String letter, int freq) {
             this(null, letter, freq, null);
         }
@@ -37,7 +41,6 @@ public class HuffmanCoder {
 
     /**
      * Takes a file and Huffman codes it
-     * 
      * @param given the file to be encoded
      * @param to    the file to write the encoded result to
      */
@@ -64,6 +67,47 @@ public class HuffmanCoder {
         Byte b = 0x0;
         getEncodings(root, b);
         encode();
+    }
+
+    public HuffmanCoder(File in){
+        txt = in;
+        result = new File("decoded.txt");
+        root = null;
+        try{
+            FileInputStream fos = new FileInputStream(txt);
+            BufferedInputStream inputBuff = new BufferedInputStream(fos);
+            decodeTree(inputBuff);
+            //TODO: add the encodings to the map for O(1) access?
+            decodeMessage(inputBuff);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+        result.createNewFile();
+    }
+    
+    /**
+     * Reads the tree from the given file and reconstructs it
+     * @param inputBuff the input of the file given
+     * @throws IOException
+     */
+    private void decodeTree(BufferedInputStream inputBuff) throws IOException{
+        createTree(root, inputBuff);
+    }
+
+    private void createTree(LetterData curr, BufferedInputStream input) throws IOException{
+        int out = input.read();
+        if(out == 1){
+            //base case: leaf node to be made, letter of node is next byte
+            char letter = (char) input.read();
+            curr = new LetterData(letter + "", -1);
+        }
+        else if(out == 0){
+            //recursion, parent node inserted
+            curr = new LetterData();
+            createTree(curr.left, input);
+            createTree(curr.right, input);
+        }
     }
 
     /**
