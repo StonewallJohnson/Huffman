@@ -4,5 +4,5 @@ public class tester {
         File give = new File("message.txt");
         File recieve = new File("encoded.txt");
         HuffmanCoder coder = new HuffmanCoder(give, recieve);
-    }
+    }    
 }
