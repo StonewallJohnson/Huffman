@@ -77,15 +77,14 @@ public class HuffmanCoder {
             FileInputStream fis = new FileInputStream(txt);
             BufferedInputStream inputBuff = new BufferedInputStream(fis);
             decodeTree(inputBuff);
-            //TODO: add the encodings to the map for O(1) access? Pretty sure I can't do this
             FileOutputStream fos = new FileOutputStream(result);
             BufferedOutputStream outputBuff = new BufferedOutputStream(fos);
             decodeMessage(root, inputBuff, outputBuff);
+            result.createNewFile();
         }
         catch(IOException e){
             e.printStackTrace();
         }
-        result.createNewFile();
     }
     
     /**
@@ -94,7 +93,7 @@ public class HuffmanCoder {
      * @throws IOException
      */
     private void decodeTree(BufferedInputStream inputBuff) throws IOException{
-        createTree(root, inputBuff);
+        root = createTree(root, inputBuff);
     }
 
     /**
@@ -103,7 +102,7 @@ public class HuffmanCoder {
      * @param input input stream from given file
      * @throws IOException
      */
-    private void createTree(LetterData curr, BufferedInputStream input) throws IOException{
+    private LetterData createTree(LetterData curr, BufferedInputStream input) throws IOException{
         int out = input.read();
         if(out == 1){
             //base case: leaf node to be made, letter of node is next byte
@@ -113,9 +112,10 @@ public class HuffmanCoder {
         else{
             //recursion, parent node inserted
             curr = new LetterData();
-            createTree(curr.left, input);
-            createTree(curr.right, input);
+            curr.left = createTree(curr.left, input);
+            curr.right = createTree(curr.right, input);
         }
+        return curr;
     }
 
     private void decodeMessage(LetterData curr, BufferedInputStream input, BufferedOutputStream output) throws IOException{
@@ -126,6 +126,7 @@ public class HuffmanCoder {
         else{
             //recursive
             Byte in = (byte) input.read();
+            
             if(in == 0x0){
                 //go left
                 decodeMessage(curr.left, input, output);
