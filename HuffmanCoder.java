@@ -74,11 +74,13 @@ public class HuffmanCoder {
         result = new File("decoded.txt");
         root = null;
         try{
-            FileInputStream fos = new FileInputStream(txt);
-            BufferedInputStream inputBuff = new BufferedInputStream(fos);
+            FileInputStream fis = new FileInputStream(txt);
+            BufferedInputStream inputBuff = new BufferedInputStream(fis);
             decodeTree(inputBuff);
-            //TODO: add the encodings to the map for O(1) access?
-            decodeMessage(inputBuff);
+            //TODO: add the encodings to the map for O(1) access? Pretty sure I can't do this
+            FileOutputStream fos = new FileOutputStream(result);
+            BufferedOutputStream outputBuff = new BufferedOutputStream(fos);
+            decodeMessage(root, inputBuff, outputBuff);
         }
         catch(IOException e){
             e.printStackTrace();
@@ -95,6 +97,12 @@ public class HuffmanCoder {
         createTree(root, inputBuff);
     }
 
+    /**
+     * Recursively build the huffman tree from the given file
+     * @param curr current node to be made
+     * @param input input stream from given file
+     * @throws IOException
+     */
     private void createTree(LetterData curr, BufferedInputStream input) throws IOException{
         int out = input.read();
         if(out == 1){
@@ -102,11 +110,30 @@ public class HuffmanCoder {
             char letter = (char) input.read();
             curr = new LetterData(letter + "", -1);
         }
-        else if(out == 0){
+        else{
             //recursion, parent node inserted
             curr = new LetterData();
             createTree(curr.left, input);
             createTree(curr.right, input);
+        }
+    }
+
+    private void decodeMessage(LetterData curr, BufferedInputStream input, BufferedOutputStream output) throws IOException{
+        if(curr.left == null && curr.left == null){
+            //base case: leaf node, a letter is decoded
+            output.write(curr.c.charAt(0));
+        }
+        else{
+            //recursive
+            Byte in = (byte) input.read();
+            if(in == 0x0){
+                //go left
+                decodeMessage(curr.left, input, output);
+            }
+            else{
+                //go right
+                decodeMessage(curr.right, input, output);
+            }
         }
     }
 
