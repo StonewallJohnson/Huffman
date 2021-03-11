@@ -1,5 +1,11 @@
 import datastructs.PriorityQueue;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -74,11 +80,12 @@ public class HuffmanCoder {
         result = new File("decoded.txt");
         root = null;
         try{
-            FileInputStream fis = new FileInputStream(txt);
-            BufferedInputStream inputBuff = new BufferedInputStream(fis);
+            // FileInputStream fis = new FileInputStream(txt);
+            // BufferedInputStream inputBuff = new BufferedInputStream(fis);
+            BitBuffer inputBuff = new BitBuffer(txt, false);
             decodeTree(inputBuff);
-            FileOutputStream fos = new FileOutputStream(result);
-            BufferedOutputStream outputBuff = new BufferedOutputStream(fos);
+            FileOutputStream fis = new FileOutputStream(result);
+            BufferedOutputStream outputBuff = new BufferedOutputStream(fis);
             decodeMessage(root, inputBuff, outputBuff);
             result.createNewFile();
         }
@@ -92,7 +99,7 @@ public class HuffmanCoder {
      * @param inputBuff the input of the file given
      * @throws IOException
      */
-    private void decodeTree(BufferedInputStream inputBuff) throws IOException{
+    private void decodeTree(BitBuffer inputBuff) throws IOException{
         root = createTree(root, inputBuff);
     }
 
@@ -102,11 +109,11 @@ public class HuffmanCoder {
      * @param input input stream from given file
      * @throws IOException
      */
-    private LetterData createTree(LetterData curr, BufferedInputStream input) throws IOException{
-        int out = input.read();
-        if(out == 1){
+    private LetterData createTree(LetterData curr, BitBuffer input) throws IOException{
+        boolean out = input.readBit();
+        if(out){
             //base case: leaf node to be made, letter of node is next byte
-            char letter = (char) input.read();
+            char letter = (char) input.readByte();
             curr = new LetterData(letter + "", -1);
         }
         else{
@@ -118,16 +125,16 @@ public class HuffmanCoder {
         return curr;
     }
 
-    private void decodeMessage(LetterData curr, BufferedInputStream input, BufferedOutputStream output) throws IOException{
+    private void decodeMessage(LetterData curr, BitBuffer input, BufferedOutputStream output) throws IOException{
         if(curr.left == null && curr.left == null){
             //base case: leaf node, a letter is decoded
             output.write(curr.c.charAt(0));
         }
         else{
             //recursive
-            Byte in = (byte) input.read();
+            boolean in = input.readBit();
             
-            if(in == 0x0){
+            if(!in){
                 //go left
                 decodeMessage(curr.left, input, output);
             }
