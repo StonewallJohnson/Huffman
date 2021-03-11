@@ -220,8 +220,7 @@ public class HuffmanCoder {
      */
     private void encode() {
         try{
-            FileOutputStream fos = new FileOutputStream(result);
-            BufferedOutputStream writeBuff = new BufferedOutputStream(fos);
+            BitBuffer writeBuff = new BitBuffer(result, true);
             writeTree(root, writeBuff);
             writeGiven(writeBuff);
             writeBuff.close();
@@ -231,7 +230,13 @@ public class HuffmanCoder {
         }
     }
 
-    private void writeTree(LetterData curr, BufferedOutputStream buffer) throws IOException {
+    /**
+     * Recursively writes the tree to the given file
+     * @param curr the current node of the tree to recurse on
+     * @param buffer the output stream for the output file
+     * @throws IOException
+     */
+    private void writeTree(LetterData curr, BitBuffer buffer) throws IOException {
         if(curr == null){
             //base case: don't write anything
         }
@@ -239,27 +244,32 @@ public class HuffmanCoder {
             //recursive
             if(curr.c.length() > 1){
                 //this is a parent node, write 0
-                buffer.write(0x0);
+                buffer.writeBit(false);
             }
             else{
                 //leaf node
-                buffer.write(0x1);
+                buffer.writeBit(true);
                 //write letter
-                buffer.write(curr.c.getBytes()[0]);
+                buffer.writeByte(curr.c.getBytes()[0]);
             }
             writeTree(curr.left, buffer);
             writeTree(curr.right, buffer);
         }
     }
 
-    private void writeGiven(BufferedOutputStream outBuffer) throws IOException{
+    /**
+     * Writes the message using the encodings of the huffman tree
+     * @param outBuffer the output stream for the output file
+     * @throws IOException
+     */
+    private void writeGiven(BitBuffer outBuffer) throws IOException{
         FileInputStream fis = new FileInputStream(txt);
         BufferedInputStream inputBuffer = new BufferedInputStream(fis);
         int output = inputBuffer.read();
         char letter = (char) output;
         while(output >= 0){
             //until end of file
-            outBuffer.write((byte) encodings.get(letter));
+            outBuffer.writeByte((byte) encodings.get(letter));
             output = inputBuffer.read();
             letter = (char) output;
         }

@@ -209,7 +209,6 @@ public class BitBuffer{
                 }
             } 
             catch(IOException e){
-                //TODO: handle exception
                 e.printStackTrace();
             }
         }
