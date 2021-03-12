@@ -71,7 +71,8 @@ public class HuffmanCoder {
         createTree();
 
         encodings = new HashMap<>();
-        getEncodings(root);
+        ArrayList<Boolean> stepKeeper = new ArrayList<>();
+        getEncodings(root, stepKeeper);
         encode();
         
         try{
@@ -92,7 +93,11 @@ public class HuffmanCoder {
             decodeTree(inputBuff);
             FileOutputStream fis = new FileOutputStream(result);
             BufferedOutputStream outputBuff = new BufferedOutputStream(fis);
-            decodeMessage(root, inputBuff, outputBuff);
+            while(!inputBuff.hasEOF()){
+                decodeMessage(root, inputBuff, outputBuff);
+            }
+            outputBuff.close();
+            inputBuff.close();
             result.createNewFile();
         }
         catch(IOException e){
@@ -134,7 +139,7 @@ public class HuffmanCoder {
     private void decodeMessage(LetterData curr, BitBuffer input, BufferedOutputStream output) throws IOException{
         if(curr.left == null && curr.left == null){
             //base case: leaf node, a letter is decoded
-            output.write(curr.c.charAt(0));
+            output.write((byte) curr.c.charAt(0));
         }
         else{
             //recursive
@@ -209,22 +214,23 @@ public class HuffmanCoder {
      * Recursively builds the byte encoding for letters and
      * stores them in a hash map
      * @param curr
-     * @param encoding
+     * @param steps
      */
-    private void getEncodings(LetterData curr){
-        ArrayList<Boolean> steps = new ArrayList<>();
+    private void getEncodings(LetterData curr, ArrayList<Boolean> steps){
         if(curr.left == null && curr.right == null){
             //base case: leaf node
-            encodings.put(curr.c.charAt(0), steps);
+            encodings.put(curr.c.charAt(0), new ArrayList<Boolean>(steps));
         }
         else{
-            //recursive
-            //append 0 and go left
+            //recursive backtracking
+            //append 0, go left, then remove the 0 once done
             steps.add(false);
-            getEncodings(curr.left);
-            //append 1 and go right
+            getEncodings(curr.left, steps);
+            steps.remove(steps.size() - 1);
+            //append 1, go right, then remove the 1 once done
             steps.add(true);
-            getEncodings(curr.right);
+            getEncodings(curr.right, steps);
+            steps.remove(steps.size() - 1);
         }
     }
 
