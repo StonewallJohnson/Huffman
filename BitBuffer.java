@@ -82,21 +82,8 @@ public class BitBuffer{
     
             while(i < 8){
                 //all remaining bits
-                if(index >= buffSize){
-                    //need to reset buffer
-                    writeBuff();
-                }
-    
-                if((byt & mask) != 0){
-                    //bit is set
-                    bits[index] = true;
-                }
-                else{
-                    bits[index] = false;
-                }
-                
-                index++;
-                mask = (byte) ( 0x1 << (8 - i - 1) );
+                writeBit((byt & mask) != 0);
+                mask = (byte) ( 0x1 << (7 - i) );
                 i++;
             }
         }
@@ -114,22 +101,9 @@ public class BitBuffer{
             int i = 0;
             byte mask = (byte) ( 0x1 << (7 - i) );
             while(i < 8){
-                //all remaining bits
-                //TODO: refactor all this logic with writeBit
-                if(index >= buffSize){
-                    //need to reset buffer
-                    writeBuff();
-                }
-    
-                if((byt & mask) != 0){
-                    //bit is set
-                    bits[index] = true;
-                }
-                else{
-                    bits[index] = false;
-                }
-                
-                index++;
+                //for every bit
+                writeBit((byt & mask) != 0);
+
                 mask = (byte) ( 0x1 << (7 - i) );
                 i++;
             }
