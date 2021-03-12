@@ -73,6 +73,13 @@ public class HuffmanCoder {
         Byte b = 0x0;
         getEncodings(root, b);
         encode();
+        
+        try{
+            result.createNewFile();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
     public HuffmanCoder(File in){
@@ -80,8 +87,7 @@ public class HuffmanCoder {
         result = new File("decoded.txt");
         root = null;
         try{
-            // FileInputStream fis = new FileInputStream(txt);
-            // BufferedInputStream inputBuff = new BufferedInputStream(fis);
+            
             BitBuffer inputBuff = new BitBuffer(txt, false);
             decodeTree(inputBuff);
             FileOutputStream fis = new FileOutputStream(result);
@@ -276,6 +282,8 @@ public class HuffmanCoder {
         char letter = (char) output;
         while(output >= 0){
             //until end of file
+            //Need to get the steps taken along the tree and write each
+            //step as a bit
             outBuffer.writeByte((byte) encodings.get(letter));
             output = inputBuffer.read();
             letter = (char) output;
