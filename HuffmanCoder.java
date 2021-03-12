@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ public class HuffmanCoder {
     private File result;
     private PriorityQueue<LetterData> queue;
     private LetterData root;
-    private HashMap<Character, Byte> encodings;
+    private HashMap<Character, ArrayList<Boolean>> encodings;
     private Map<Character, Integer> data;
 
     private class LetterData implements Comparable<LetterData> {
@@ -70,8 +71,7 @@ public class HuffmanCoder {
         createTree();
 
         encodings = new HashMap<>();
-        Byte b = 0x0;
-        getEncodings(root, b);
+        getEncodings(root);
         encode();
         
         try{
@@ -211,19 +211,20 @@ public class HuffmanCoder {
      * @param curr
      * @param encoding
      */
-    private void getEncodings(LetterData curr, Byte encoding){
+    private void getEncodings(LetterData curr){
+        ArrayList<Boolean> steps = new ArrayList<>();
         if(curr.left == null && curr.right == null){
             //base case: leaf node
-            encodings.put(curr.c.charAt(0), encoding);
+            encodings.put(curr.c.charAt(0), steps);
         }
         else{
             //recursive
             //append 0 and go left
-            encoding = (byte) (encoding << 1);
-            getEncodings(curr.left, encoding);
+            steps.add(false);
+            getEncodings(curr.left);
             //append 1 and go right
-            encoding = (byte) (encoding | 0x1);
-            getEncodings(curr.right, encoding);
+            steps.add(true);
+            getEncodings(curr.right);
         }
     }
 
@@ -284,7 +285,11 @@ public class HuffmanCoder {
             //until end of file
             //Need to get the steps taken along the tree and write each
             //step as a bit
-            outBuffer.writeByte((byte) encodings.get(letter));
+            ArrayList<Boolean> steps = encodings.get(letter);
+            for(boolean step : steps){
+                //for every step in the tree
+                outBuffer.writeBit(step);
+            }
             output = inputBuffer.read();
             letter = (char) output;
         }
