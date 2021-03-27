@@ -4,10 +4,6 @@ public class LetterData implements Comparable<LetterData> {
     protected LetterData left;
     protected LetterData right;
 
-    public LetterData(){
-
-    }
-
     public LetterData(String letter, int freq) {
         this(null, letter, freq, null);
     }
