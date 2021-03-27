@@ -1,23 +1,13 @@
-import datastructs.PriorityQueue;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
+
 
 public class HuffmanDecoder {
     private File txt;
     private File result;
-    private PriorityQueue<LetterData> queue;
     private LetterData root;
-    private HashMap<Character, ArrayList<Boolean>> encodings;
-    private Map<Character, Integer> data;
     private boolean EOFReached;
 
     public HuffmanDecoder(File in){
