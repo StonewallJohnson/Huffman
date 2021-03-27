@@ -15,6 +15,9 @@ public class LetterData implements Comparable<LetterData> {
         right = r;
     }
 
+    public LetterData() {
+    }
+
     @Override
     public int compareTo(LetterData o) {
         return this.frequency - o.frequency;
