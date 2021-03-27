@@ -18,6 +18,7 @@ public class HuffmanCoder {
     private LetterData root;
     private HashMap<Character, ArrayList<Boolean>> encodings;
     private Map<Character, Integer> data;
+    private boolean EOFReached;
 
     private class LetterData implements Comparable<LetterData> {
         private String c;
@@ -56,20 +57,27 @@ public class HuffmanCoder {
         result = to;
         data = new HashMap<>();
         queue = new PriorityQueue<>();
-        
+ 
         try {
+            //add end of text character to file
+            FileOutputStream output = new FileOutputStream(txt, true);
+            output.write((char) 3);
+            //count the occurence of letters in file
             FileInputStream reader = new FileInputStream(txt);
             BufferedInputStream buffer = new BufferedInputStream(reader);
             mapFile(buffer);
+            output.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        //create huffman tree
         populateQueue();
         createTree();
 
+        //write new encoded file
         encodings = new HashMap<>();
         ArrayList<Boolean> stepKeeper = new ArrayList<>();
         getEncodings(root, stepKeeper);
@@ -87,14 +95,15 @@ public class HuffmanCoder {
         txt = in;
         result = new File("decoded.txt");
         root = null;
+        EOFReached = false;
         try{
             
             BitBuffer inputBuff = new BitBuffer(txt, false);
             decodeTree(inputBuff);
             FileOutputStream fis = new FileOutputStream(result);
             BufferedOutputStream outputBuff = new BufferedOutputStream(fis);
-            while(!inputBuff.hasEOF()){
-                decodeMessage(root, inputBuff, outputBuff);
+            while(!EOFReached){
+                decodeLetter(root, inputBuff, outputBuff);
             }
             outputBuff.close();
             inputBuff.close();
@@ -136,22 +145,38 @@ public class HuffmanCoder {
         return curr;
     }
 
-    private void decodeMessage(LetterData curr, BitBuffer input, BufferedOutputStream output) throws IOException{
+    /**
+     * Recursively traverses the huffman tree to decode one letter
+     * and write it to the new file
+     * @param curr the current node of the tree
+     * @param input the bit buffer of the encoded file
+     * @param output the output for the decoded file
+     * @throws IOException
+     */
+    private void decodeLetter(LetterData curr, BitBuffer input, BufferedOutputStream output) throws IOException{
         if(curr.left == null && curr.left == null){
             //base case: leaf node, a letter is decoded
-            output.write((byte) curr.c.charAt(0));
+            char letter =  curr.c.charAt(0);
+            if(letter != (char) 3){
+                //not the end of text character
+                output.write(letter);
+            }
+            else{
+                //end of text reached
+                EOFReached = true;
+            }
         }
         else{
             //recursive
             boolean in = input.readBit();
             
             if(!in){
-                //go left
-                decodeMessage(curr.left, input, output);
+                //bit is zero, go left
+                decodeLetter(curr.left, input, output);
             }
             else{
-                //go right
-                decodeMessage(curr.right, input, output);
+                //bit is one, go right
+                decodeLetter(curr.right, input, output);
             }
         }
     }
@@ -185,6 +210,7 @@ public class HuffmanCoder {
      * of them and adds the nodes to a priority queue
      */
     private void populateQueue() {
+        
         Set<Character> keys = data.keySet();
         for (Character c : keys) {
             // for every key, value pair
@@ -299,6 +325,7 @@ public class HuffmanCoder {
             output = inputBuffer.read();
             letter = (char) output;
         }
+
         inputBuffer.close();
     }
 }
