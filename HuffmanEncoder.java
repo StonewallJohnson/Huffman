@@ -4,55 +4,26 @@ import java.io.FileNotFoundException;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class HuffmanCoder {
+public class HuffmanEncoder {
     private File txt;
     private File result;
     private PriorityQueue<LetterData> queue;
     private LetterData root;
     private HashMap<Character, ArrayList<Boolean>> encodings;
     private Map<Character, Integer> data;
-    private boolean EOFReached;
-
-    private class LetterData implements Comparable<LetterData> {
-        private String c;
-        private int frequency;
-        private LetterData left;
-        private LetterData right;
-
-        public LetterData(){
-
-        }
-
-        public LetterData(String letter, int freq) {
-            this(null, letter, freq, null);
-        }
-
-        public LetterData(LetterData l, String letter, int freq, LetterData r) {
-            left = l;
-            c = letter;
-            frequency = freq;
-            right = r;
-        }
-
-        @Override
-        public int compareTo(HuffmanCoder.LetterData o) {
-            return this.frequency - o.frequency;
-        }
-    }
-
+    
     /**
      * Takes a file and Huffman codes it
      * @param given the file to be encoded
      * @param to    the file to write the encoded result to
      */
-    public HuffmanCoder(File given, File to) {
+    public HuffmanEncoder(File given, File to) {
         txt = given;
         result = to;
         data = new HashMap<>();
@@ -91,97 +62,7 @@ public class HuffmanCoder {
         }
     }
 
-    public HuffmanCoder(File in){
-        txt = in;
-        result = new File("decoded.txt");
-        root = null;
-        EOFReached = false;
-        try{
-            
-            BitBuffer inputBuff = new BitBuffer(txt, false);
-            decodeTree(inputBuff);
-            FileOutputStream fis = new FileOutputStream(result);
-            BufferedOutputStream outputBuff = new BufferedOutputStream(fis);
-            while(!EOFReached){
-                decodeLetter(root, inputBuff, outputBuff);
-            }
-            outputBuff.close();
-            inputBuff.close();
-            result.createNewFile();
-        }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * Reads the tree from the given file and reconstructs it
-     * @param inputBuff the input of the file given
-     * @throws IOException
-     */
-    private void decodeTree(BitBuffer inputBuff) throws IOException{
-        root = createTree(root, inputBuff);
-    }
-
-    /**
-     * Recursively build the huffman tree from the given file
-     * @param curr current node to be made
-     * @param input input stream from given file
-     * @throws IOException
-     */
-    private LetterData createTree(LetterData curr, BitBuffer input) throws IOException{
-        boolean out = input.readBit();
-        if(out){
-            //base case: leaf node to be made, letter of node is next byte
-            char letter = (char) input.readByte();
-            curr = new LetterData(letter + "", -1);
-        }
-        else{
-            //recursion, parent node inserted
-            curr = new LetterData();
-            curr.left = createTree(curr.left, input);
-            curr.right = createTree(curr.right, input);
-        }
-        return curr;
-    }
-
-    /**
-     * Recursively traverses the huffman tree to decode one letter
-     * and write it to the new file
-     * @param curr the current node of the tree
-     * @param input the bit buffer of the encoded file
-     * @param output the output for the decoded file
-     * @throws IOException
-     */
-    private void decodeLetter(LetterData curr, BitBuffer input, BufferedOutputStream output) throws IOException{
-        if(curr.left == null && curr.left == null){
-            //base case: leaf node, a letter is decoded
-            char letter =  curr.c.charAt(0);
-            if(letter != (char) 3){
-                //not the end of text character
-                output.write(letter);
-            }
-            else{
-                //end of text reached
-                EOFReached = true;
-            }
-        }
-        else{
-            //recursive
-            boolean in = input.readBit();
-            
-            if(!in){
-                //bit is zero, go left
-                decodeLetter(curr.left, input, output);
-            }
-            else{
-                //bit is one, go right
-                decodeLetter(curr.right, input, output);
-            }
-        }
-    }
-
-    /**
+     /**
      * Reads the given file byte by byte and maps the frequency of
      * occurance into a data map
      * @throws IOException attempts to read the given file
@@ -204,7 +85,7 @@ public class HuffmanCoder {
         }
         buffer.close();
     }
-    
+
     /**
      * Takes the values from the frequency map, makes nodes 
      * of them and adds the nodes to a priority queue
@@ -329,3 +210,4 @@ public class HuffmanCoder {
         inputBuffer.close();
     }
 }
+
